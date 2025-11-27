@@ -132,7 +132,7 @@ impl QRCodesSpatialContext {
         let new = Instant::now();
 
         if self.snapshot_future.is_none()
-            //&& self.discovery_enabled.value()
+            && self.discovery_enabled.value()
             && new > self.discovery_timeout_deadline
         {
             let snapshot_create_info = sys::SpatialDiscoverySnapshotCreateInfoEXT {
@@ -244,13 +244,12 @@ impl QRCodesSpatialContext {
 
         let mut out_markers = vec![];
         for idx in 0..query_result.entity_id_count_output as usize {
-            alvr_common::error!("Parsing marker");
             if self.entity_states[idx] != sys::SpatialEntityTrackingStateEXT::TRACKING
                 || self.marker_arr[idx].capability != CAPABILITY
                 || self.marker_arr[idx].data.buffer_id == sys::SpatialBufferIdEXT::NULL
                 || self.marker_arr[idx].data.buffer_type != sys::SpatialBufferTypeEXT::STRING
             {
-                alvr_common::error!(
+                alvr_common::debug!(
                     "Parsing marker failed! {:?} {:?} {:?} {:?}",
                     self.entity_states[idx],
                     self.marker_arr[idx].capability,

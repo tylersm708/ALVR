@@ -1,3 +1,4 @@
+use glam::Vec2;
 use std::{collections::VecDeque, time::Duration};
 
 pub struct SlidingWindowAverage<T> {
@@ -36,5 +37,42 @@ impl SlidingWindowAverage<f32> {
 impl SlidingWindowAverage<Duration> {
     pub fn get_average(&self) -> Duration {
         self.history_buffer.iter().sum::<Duration>() / self.history_buffer.len() as u32
+    }
+}
+
+impl SlidingWindowAverage<Vec2> {
+    pub fn get_average(&self) -> Vec2 {
+        self.history_buffer.iter().sum::<Vec2>() / self.history_buffer.len() as f32
+    }
+}
+
+pub struct AngleSlidingWindowAverage {
+    history_buffer: VecDeque<Vec2>,
+    max_history_size: usize,
+}
+
+impl AngleSlidingWindowAverage {
+    pub fn new(initial_value: f32, max_history_size: usize) -> Self {
+        Self {
+            history_buffer: [Vec2::from_angle(initial_value)].into_iter().collect(),
+            max_history_size,
+        }
+    }
+
+    pub fn submit_sample(&mut self, sample: f32) {
+        if self.history_buffer.len() >= self.max_history_size {
+            self.history_buffer.pop_front();
+        }
+
+        self.history_buffer.push_back(Vec2::from_angle(sample));
+    }
+
+    pub fn retain(&mut self, count: usize) {
+        self.history_buffer
+            .drain(0..self.history_buffer.len().saturating_sub(count));
+    }
+
+    pub fn get_average(&self) -> f32 {
+        self.history_buffer.iter().sum::<Vec2>().to_angle()
     }
 }
